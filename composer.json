@@ -1,0 +1,27 @@
+{
+    "name": "dcarrith/queuel",
+    "description": "",
+    "authors": [
+        {
+            "name": "Dave Carrithers",
+            "email": "dcarrith@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "laravel/framework": "4.2.*",
+	"monolog/monolog": "1.*",
+	"mockery/mockery": "dev-master",
+        "aws/aws-sdk-php": "dev-master",
+        "videlalvaro/php-amqplib": "2.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Dcarrith\\Queuel\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
