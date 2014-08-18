@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Log;
+//use Log;
 
 class UpdateCommand extends Command {
 
@@ -32,11 +32,11 @@ class UpdateCommand extends Command {
 	{
 		$queue = $this->laravel['queue']->connection();
 
-		Log::info('UpdateCommand fire', array('options', array_only($this->option(), array('retries', 'errqueue'))));
+		//Log::info('UpdateCommand fire', array('options', array_only($this->option(), array('retries', 'errqueue'))));
 
 		$advanced = json_decode(stripslashes($this->option('advanced')), true);
 
-		Log::info('UpdateCommand fire', array('advanced', $advanced));
+		//Log::info('UpdateCommand fire', array('advanced', $advanced));
 
 		$queue->update($this->argument('queue'), $this->argument('url'), array_only($this->option(), array('retries', 'errqueue')), $advanced);
 

@@ -4,13 +4,11 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Illuminate\Http\Response;
-use Illuminate\Queue\Queue;
 use Illuminate\Queue\QueueInterface;
-//use Dcarrith\Queuel\Jobs\RabbitJob;
-//use Illuminate\Queue\Jobs\RabbitJob;
-use Log;
+use Dcarrith\Queuel\Jobs\RabbitJob;
+//use Log;
 
-class RabbitQueue extends Queue implements QueueInterface {
+class RabbitQueue extends Queuel implements QueueInterface {
 
 	/**
 	 * The Rabbit connection
@@ -70,9 +68,9 @@ class RabbitQueue extends Queue implements QueueInterface {
 	 */
 	public function pushRaw($payload, $queue = null, array $options = array())
 	{
-		Log::info('RabbitQueue pushRaw', array('payload' => $payload));
+		//Log::info('RabbitQueue pushRaw', array('payload' => $payload));
 
-		Log::info('RabbitQueue pushRaw', array('queue' => $this->getQueue($queue)));
+		//Log::info('RabbitQueue pushRaw', array('queue' => $this->getQueue($queue)));
 
 		$this->channel->queue_declare($this->getQueue($queue), false, true, false, false);
 
@@ -91,7 +89,7 @@ class RabbitQueue extends Queue implements QueueInterface {
 	 */
 	public function recreate($payload, $queue = null, $delay)
 	{
-		Log::info('RabbitQueue recreate', array('sleep' => $delay));
+		//Log::info('RabbitQueue recreate', array('sleep' => $delay));
 
 		sleep($delay);
 

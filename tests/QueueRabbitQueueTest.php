@@ -46,7 +46,7 @@ class QueueRabbitQueueTest extends PHPUnit_Framework_TestCase {
 	public function testPushProperlyPushesJobOntoRabbit()
 	{
 		$this->mockedConnection->shouldReceive('channel')->once()->andReturn($this->mockedChannel);
-		$queue = $this->getMock('Illuminate\Queue\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
+		$queue = $this->getMock('Dcarrith\Queuel\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
 		$queue->setContainer($this->mockedContainer);
 		$queue->expects($this->any())->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
 		$this->mockedChannel->shouldReceive('queue_declare')->once()->with($this->queue, false, true, false, false)->andReturn(null);
@@ -56,17 +56,21 @@ class QueueRabbitQueueTest extends PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('Illuminate\Http\Response', $result);
 	}
 
-	public function testPopProperlyPopsJobOffOfSqs()
+	public function testPopProperlyPopsJobOffOfRabbit()
 	{
 		$this->mockedConnection->shouldReceive('channel')->once()->andReturn($this->mockedChannel);
-		$queue = $this->getMock('Illuminate\Queue\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
+		$queue = $this->getMock('Dcarrith\Queuel\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
 		$queue->setContainer($this->mockedContainer);
-		$queue->expects($this->any())->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+		//$queue->expects($this->any())->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+		$queue->expects($this->at(0))->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+		$queue->expects($this->at(1))->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+		$queue->expects($this->at(2))->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+		$queue->expects($this->at(3))->method('getQueue')->with(null)->will($this->returnValue($this->queue));
 		$this->mockedChannel->shouldReceive('queue_declare')->once()->with($this->queue, false, true, false, false)->andReturn(null);
 		$this->mockedChannel->shouldReceive('basic_get')->once()->with($this->queue)->andReturn($this->message);
 		//$this->mockedChannel->shouldReceive('basic_ack')->once()->with($this->message->delivery_info['delivery_tag'])->andReturn(null);
 		$result = $queue->pop($this->queue);
-		$this->assertInstanceOf('Illuminate\Queue\Jobs\RabbitJob', $result);
+		$this->assertInstanceOf('Dcarrith\Queuel\Jobs\RabbitJob', $result);
 	}
 
 	/**
@@ -75,7 +79,7 @@ class QueueRabbitQueueTest extends PHPUnit_Framework_TestCase {
 	public function testDelayedPushThrowsRuntimeException()
 	{
 		$this->mockedConnection->shouldReceive('channel')->once()->andReturn($this->mockedChannel);
-		$queue = $this->getMock('Illuminate\Queue\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
+		$queue = $this->getMock('Dcarrith\Queuel\RabbitQueue', array('getQueue'), array($this->mockedConnection, $this->queue));
 		$queue->setContainer($this->mockedContainer);
 		$queue->expects($this->any())->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
 		$queue->later($this->delay, $this->job, $this->data, $this->queue);

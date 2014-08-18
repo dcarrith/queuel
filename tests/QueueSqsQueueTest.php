@@ -3,7 +3,7 @@
 use Mockery as m;
 
 use Illuminate\Http\Request;
-use Illuminate\Queue\Console\SubscribeCommand;
+use Dcarrith\Queuel\Console\SubscribeCommand;
 use Aws\Sqs\SqsClient;
 use Guzzle\Service\Resource\Model;
 
@@ -33,7 +33,9 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 		$this->mockedData = array('data');
 		$this->mockedPayload = json_encode(array('job' => $this->mockedJob, 'data' => $this->mockedData));
 		$this->mockedDelay = 10;
-		$this->mockedDateTime = m::mock('DateTime');
+
+		$this->mockedDateTime = m::mock('Carbon');
+
 		$this->mockedMessageId = 'e3cd03ee-59a3-4ad8-b0aa-ee2e3808ac81';
 		$this->mockedReceiptHandle = '0NNAq8PwvXuWv5gMtS9DJ8qEdyiUwbAjpp45w2m6M4SJ1Y+PxCh7R930NRB8ylSacEmoSnW18bgd4nK\/O6ctE+VFVul4eD23mA07vVoSnPI4F\/voI1eNCp6Iax0ktGmhlNVzBwaZHEr91BRtqTRM3QKd2ASF8u+IQaSwyl\/DGK+P1+dqUOodvOVtExJwdyDLy1glZVgm85Yw9Jf5yZEEErqRwzYz\/qSigdvW4sm2l7e4phRol\/+IjMtovOyH\/ukueYdlVbQ4OshQLENhUKe7RNN5i6bE\/e5x9bnPhfj2gbM';
 
@@ -52,7 +54,7 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testGetQueueUrlCallsGetBaseUrlAndBuildsQueueUrl()
 	{
-		$queue = new Illuminate\Queue\SqsQueue($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->queueName, $this->account);
+		$queue = new Dcarrith\Queuel\SqsQueue($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->queueName, $this->account);
 		$this->sqs->shouldReceive('getBaseUrl')->once()->andReturn($this->baseUrl);
 		$resultQueueUrl = $queue->getQueueUrl($this->queueName);
 		$this->assertEquals($this->queueUrl, $resultQueueUrl);
@@ -63,17 +65,17 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testPopProperlyPopsJobOffOfSqs()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('getQueueUrl'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('getQueueUrl'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$queue->expects($this->once())->method('getQueueUrl')->with($this->queueName)->will($this->returnValue($this->queueUrl));
 		$this->sqs->shouldReceive('receiveMessage')->once()->with(array('QueueUrl' => $this->queueUrl, 'AttributeNames' => array('ApproximateReceiveCount')))->andReturn($this->mockedReceiveMessageResponseModel);
 		$result = $queue->pop($this->queueName);
-		$this->assertInstanceOf('Illuminate\Queue\Jobs\SqsJob', $result);
+		$this->assertInstanceOf('Dcarrith\Queuel\Jobs\SqsJob', $result);
 	}
 
 	public function testDelayedPushWithDateTimeProperlyPushesJobOntoSqs()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createPayload', 'getQueueUrl', 'getSeconds'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createPayload', 'getQueueUrl', 'getSeconds'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
 		$queue->expects($this->once())->method('createPayload')->with($this->mockedJob, $this->mockedData)->will($this->returnValue($this->mockedPayload));
 		$queue->expects($this->once())->method('getSeconds')->with($this->mockedDateTime)->will($this->returnValue($this->mockedDateTime));
 		$queue->expects($this->once())->method('getQueueUrl')->with($this->queueName)->will($this->returnValue($this->queueUrl));
@@ -84,7 +86,7 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testDelayedPushProperlyPushesJobOntoSqs()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createPayload', 'getQueueUrl', 'getSeconds'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createPayload', 'getQueueUrl', 'getSeconds'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
 		$queue->expects($this->once())->method('createPayload')->with($this->mockedJob, $this->mockedData)->will($this->returnValue($this->mockedPayload));
 		$queue->expects($this->once())->method('getSeconds')->with($this->mockedDelay)->will($this->returnValue($this->mockedDelay));
 		$queue->expects($this->once())->method('getQueueUrl')->with($this->queueName)->will($this->returnValue($this->queueUrl));
@@ -95,17 +97,17 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testPushProperlyPushesJobOntoSqs()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createPayload', 'getQueueUrl'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createPayload', 'getQueueUrl'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
 		$queue->expects($this->once())->method('createPayload')->with($this->mockedJob, $this->mockedData)->will($this->returnValue($this->mockedPayload));
 		$queue->expects($this->once())->method('getQueueUrl')->with($this->queueName)->will($this->returnValue($this->queueUrl));
 		$this->sqs->shouldReceive('sendMessage')->once()->with(array('QueueUrl' => $this->queueUrl, 'MessageBody' => $this->mockedPayload))->andReturn($this->mockedSendMessageResponseModel);
 		$id = $queue->push($this->mockedJob, $this->mockedData, $this->queueName);
 		$this->assertEquals($this->mockedMessageId, $id);
 	}
-	
+
 	public function testPushedJobsCanBeMarshaled()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-type')->andReturn('Notification');
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-id')->andReturn('message-id');
 		$request->shouldReceive('header')->once()->with('x-aws-sqsd-msgid')->andReturn('message-id');
@@ -114,8 +116,8 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 			'MessageId' => 'message-id',
 			'Body' => json_encode(array('foo' => 'bar'))
 		);
-		$queue->expects($this->once())->method('createSqsJob')->with($this->equalTo($pushedJob))->will($this->returnValue($mockSqsJob = m::mock('StdClass')));
-		$mockSqsJob->shouldReceive('fire')->once();
+		$queue->expects($this->once())->method('createSqsJob')->with($this->equalTo($pushedJob))->will($this->returnValue($mockedSqsJob = m::mock('StdClass')));
+		$mockedSqsJob->shouldReceive('fire')->once();
 		$response = $queue->marshal();
 		$this->assertInstanceOf('Illuminate\Http\Response', $response);
 		$this->assertEquals(200, $response->getStatusCode());
@@ -126,7 +128,7 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testPushedJobsMustComeFromSqsOrSns()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-type')->andReturn(null);
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-id')->andReturn(null);
 		$request->shouldReceive('header')->once()->with('x-aws-sqsd-msgid')->andReturn(null);
@@ -135,7 +137,7 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testSubscriptionConfirmationNoJob()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-type')->andReturn('SubscriptionConfirmation');
 		$request->shouldReceive('json')->once()->with('TopicArn')->andReturn('foo');
 		$request->shouldReceive('json')->once()->with('Token')->andReturn('bar');
@@ -147,7 +149,7 @@ class QueueSqsQueueTest extends PHPUnit_Framework_TestCase {
 
 	public function testSubscribeToSqsQueue()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('createSqsJob'), array($this->sqs, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$request->shouldReceive('header')->once()->with('x-amz-sns-message-type')->andReturn('SubscriptionConfirmation');
 		$request->shouldReceive('json')->once()->with('TopicArn')->andReturn('foo');
 		$request->shouldReceive('json')->once()->with('Token')->andReturn('bar');

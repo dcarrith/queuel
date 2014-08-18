@@ -2,11 +2,10 @@
 
 use RuntimeException;
 use Illuminate\Container\Container;
-use Illuminate\Queue\Jobs\Job;
 use Dcarrith\Queuel\SqsQueue;
-use Log;
+//use Log;
 
-class SqsJob extends Job {
+class SqsJob extends QueuelJob {
 
 	/**
 	 * The job is the response from the sqs receiveMessage.
@@ -77,13 +76,13 @@ class SqsJob extends Job {
 	 */
 	public function delete()
 	{
-		Log::info('SqsJob delete', array('message' => 'calling parent::delete()'));
+		//Log::info('SqsJob delete', array('message' => 'calling parent::delete()'));
 
 		parent::delete();
 
 		$queueUrl = $this->getSqsQueue()->getQueueUrl();
 
-		Log::info('SqsJob delete', array('message' => 'checking if isset(this->isPushed())'));
+		//Log::info('SqsJob delete', array('message' => 'checking if isset(this->isPushed())'));
 
 		if ($this->isPushed())
 		{
@@ -91,11 +90,11 @@ class SqsJob extends Job {
 
 			$topic = $this->parseTopicArn($r, 'topic');
 
-			Log::info('SqsJob delete', array('topic' => $topic));
+			//Log::info('SqsJob delete', array('topic' => $topic));
 
 			$queueUrl = $this->getSqsQueue()->getQueueUrl($topic);
 
-			Log::info('SqsJob delete', array('QueueUrl' => $queueUrl));
+			//Log::info('SqsJob delete', array('QueueUrl' => $queueUrl));
 
 			$response = $this->getSqsQueue()->getSqs()->receiveMessage(array(
 
@@ -103,18 +102,18 @@ class SqsJob extends Job {
 
 			));
 
-			Log::info('SqsJob delete', array('response' => $response->toArray()));
+			//Log::info('SqsJob delete', array('response' => $response->toArray()));
 
 			$receiptHandle = $response->toArray()['Messages'][0]['ReceiptHandle'];
 		}
 		else
 		{
-			Log::info('SqsJob delete else', array('QueueUrl' => $queueUrl));
+			//Log::info('SqsJob delete else', array('QueueUrl' => $queueUrl));
 
 			$receiptHandle = $this->job['ReceiptHandle'];
 		}
 
-		Log::info('SqsJob delete', array('receiptHandle' => $receiptHandle));
+		//Log::info('SqsJob delete', array('receiptHandle' => $receiptHandle));
 
 		$this->getSqsQueue()->getSqs()->deleteMessage(array(
 
@@ -135,11 +134,11 @@ class SqsJob extends Job {
 
 		if( ! in_array($piece, $pieces)) throw new RuntimeException("The target piece is not part of the TopicArn.");
 
-		Log::info('SqsJob parseTopicArn', array('TopicArn' => $request->header('x-amz-sns-topic-arn')));
+		//Log::info('SqsJob parseTopicArn', array('TopicArn' => $request->header('x-amz-sns-topic-arn')));
 
 		list($arn, $aws, $service, $region, $account, $topic) = explode(":", $request->header('x-amz-sns-topic-arn'));
 
-		Log::info('SqsJob parseTopicArn', array('piece' => $piece, 'retrieved' => compact($pieces)[$piece]));
+		//Log::info('SqsJob parseTopicArn', array('piece' => $piece, 'retrieved' => compact($pieces)[$piece]));
 
 		return compact($pieces)[$piece];
 	}

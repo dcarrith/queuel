@@ -145,7 +145,7 @@ class QueuelServiceProvider extends QueueServiceProvider {
 			return new RabbitConnector($app['request']);
 		});
 
-		parent::registerRequestBinder('rabbit');
+		$this->registerRequestBinder('rabbit');
 	}
 
         /**
@@ -165,8 +165,25 @@ class QueuelServiceProvider extends QueueServiceProvider {
                         return new SqsConnector($app['request']);
                 });
 
-                parent::registerRequestBinder('sqs');
+                $this->registerRequestBinder('sqs');
         }
+
+	/**
+	 * Register the request rebinding event for the push queue.
+	 *
+	 * @param string $driver
+	 * @return void
+	 */
+	protected function registerRequestBinder($driver)
+	{
+		$this->app->rebinding('request', function($app, $request) use ($driver)
+		{
+			if ($app['queue']->connected($driver))
+			{
+				$app['queue']->connection($driver)->setRequest($request);
+			}
+		});
+	}
 
         /**
          * Get the services provided by the provider.

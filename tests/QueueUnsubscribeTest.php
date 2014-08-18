@@ -10,9 +10,9 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 
 	public function setUp() {
 
-		parent::setUp();	
+		parent::setUp();
 
-		$this->command = new Illuminate\Queue\Console\UnsubscribeCommand;
+		$this->command = new Dcarrith\Queuel\Console\UnsubscribeCommand;
 
 		$this->sns = m::mock('Aws\Sns\SnsClient');
 		$this->sqs = m::mock('Aws\Sqs\SqsClient');
@@ -21,8 +21,8 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 		$this->account = '1234567891011';
 		$this->queueName = 'notifications';
 		$this->topicName = 'notifications';
-		
-		$this->endpointUrl = 'http://www.somedomain.com/receive/notifications';	
+
+		$this->endpointUrl = 'http://www.somedomain.com/receive/notifications';
 		$this->mockedTopicArn = 'arn:aws:sns:'.$this->region.':'.$this->account.':'.$this->topicName;
 		$this->mockedSubscriptionArn = $this->mockedTopicArn . ':foo';
 		$this->mockedRequestId = 'foo';
@@ -44,10 +44,10 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 
 	public function testUnsubscribeCommandUnsubscribesFromSnsTopic()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('connection'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('connection'), array($this->sqs, $this->sns, m::mock('Illuminate\Http\Request'), $this->account, $this->queueName));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$app = $this->getQueueConfigForTest($queue, 'sqs');
-		$queue->expects($this->any())->method('connection')->will($this->returnValue($queue));	
+		$queue->expects($this->any())->method('connection')->will($this->returnValue($queue));
 		$this->sns->shouldReceive('listSubscriptions')->once()->andReturn($response = $this->mockedListSubscriptionsResponseModel);
 		$this->sns->shouldReceive('unsubscribe')->once()->with(array('SubscriptionArn' => $this->mockedSubscriptionArn))->andReturn($this->mockedUnsubscribeResponseModel);
 		$this->command->setLaravel($app);
@@ -56,7 +56,7 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 
 	public function testUnsubscribeCommandUnsubscribesFromIronQueue()
 	{
-		$queue = $this->getMock('Illuminate\Queue\IronQueue', array('connection'), array($iron = m::mock('IronMQ'), $crypt = m::mock('Illuminate\Encryption\Encrypter'), m::mock('Illuminate\Http\Request'), 'default', true));
+		$queue = $this->getMock('Dcarrith\Queuel\IronQueue', array('connection'), array($iron = m::mock('IronMQ'), $crypt = m::mock('Illuminate\Encryption\Encrypter'), m::mock('Illuminate\Http\Request'), 'default', true));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$app = $this->getQueueConfigForTest($queue, 'iron');
 		$queue->expects($this->any())->method('connection')->will($this->returnValue($queue));
@@ -71,7 +71,7 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testUnsubscribeCommandThrowsRuntimeExceptionForBeanstalkd()
 	{
-		$queue = $this->getMock('Illuminate\Queue\BeanstalkdQueue', array('connection'), array(m::mock('Pheanstalk_Pheanstalk'), 'default'));
+		$queue = $this->getMock('Dcarrith\Queuel\BeanstalkdQueue', array('connection'), array(m::mock('Pheanstalk_Pheanstalk'), 'default'));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$this->config->shouldReceive('get')->once()->with('queue.default')->andReturn('beanstalkd');
 		$app = $this->getQueueConfigForTest($queue, 'beanstalkd');
@@ -86,7 +86,7 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testUnSubscribeCommandThrowsRuntimeExceptionForRedis()
 	{
-		$queue = $this->getMock('Illuminate\Queue\RedisQueue', array('connection'), array($redis = m::mock('Illuminate\Redis\Database'), 'default'));
+		$queue = $this->getMock('Dcarrith\Queuel\RedisQueue', array('connection'), array($redis = m::mock('Illuminate\Redis\Database'), 'default'));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$this->config->shouldReceive('get')->once()->with('queue.default')->andReturn('redis');
 		$app = $this->getQueueConfigForTest($queue, 'redis');
@@ -101,7 +101,7 @@ class QueueUnsubscribeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testUnsubscribeCommandThrowsRuntimeExceptionForSync()
 	{
-		$queue = $this->getMock('Illuminate\Queue\SyncQueue', array('connection'));
+		$queue = $this->getMock('Dcarrith\Queuel\SyncQueue', array('connection'));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$this->config->shouldReceive('get')->once()->with('queue.default')->andReturn('sync');
 		$app = $this->getQueueConfigForTest($queue, 'sync');

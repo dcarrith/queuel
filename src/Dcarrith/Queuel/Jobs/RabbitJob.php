@@ -1,12 +1,11 @@
-<?php namespace Dcarrith\Queuel;
+<?php namespace Dcarrith\Queuel\Jobs;
 
-use Illuminate\Queue\Jobs\Job;
 use Illuminate\Container\Container;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Dcarrith\Queuel\RabbitQueue;
 
-class RabbitJob extends Job {
+class RabbitJob extends QueuelJob {
 
 	/**
 	 * The job is the response from the RabbitMQ basic_get.
@@ -18,7 +17,7 @@ class RabbitJob extends Job {
 	/**
 	 * The Rabbit queue instance.
 	 *
-	 * @var \Dcarrith\Queuel\RabbitMQ\RabbitQueue $rabbit
+	 * @var \Dcarrith\Queuel\RabbitQueue $rabbit
 	 */
 	protected $rabbit;
 
@@ -33,7 +32,7 @@ class RabbitJob extends Job {
 	 * Create a new job instance.
 	 *
 	 * @param  \Illuminate\Container\Container  $container
-	 * @param  \Dcarrith\Queuel\RabbitMQ\RabbitQueue $queue
+	 * @param  \Dcarrith\Queuel\RabbitQueue $queue
 	 * @param  \PhpAmqpLib\Message\AMQPMessage $job
 	 * @param  boolean $pushed
 	 * @return void

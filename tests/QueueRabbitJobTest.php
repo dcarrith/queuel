@@ -59,7 +59,7 @@ class QueueRabbitJobTest extends PHPUnit_Framework_TestCase {
 		$this->mockedConnection->shouldReceive('channel')->once()->andReturn($this->mockedChannel);
 		$queue = $this->getMock('Dcarrith\Queuel\RabbitQueue', array('getQueue', 'recreate', 'pushRaw'), array($this->mockedConnection, $this->queue));
 		$queue->setContainer($this->mockedContainer);
-                $queue->expects($this->any())->method('getQueue')->with($this->queue)->will($this->returnValue($this->queue));
+                $queue->expects($this->any())->method('getQueue')->with(null)->will($this->returnValue($this->queue));
 		$this->mockedChannel->shouldReceive('basic_ack')->once()->with($this->message->delivery_info['delivery_tag'])->andReturn(null);
 		$queue->expects($this->once())->method('recreate')->with($this->recreatedPayload, $this->queue, 0)->will($this->returnValue(new Response('Ok')));
 		$job = $this->getJob($queue);

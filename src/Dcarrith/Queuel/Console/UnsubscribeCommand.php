@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-use Log;
+//use Log;
 
 class UnsubscribeCommand extends Command {
 
@@ -32,7 +32,7 @@ class UnsubscribeCommand extends Command {
 	{
 		$queue = $this->laravel['queue']->connection();
 
-		Log::info('UnsubscribeCommand fire', array('arguments' => $this->argument()));
+		//Log::info('UnsubscribeCommand fire', array('arguments' => $this->argument()));
 
 		$queue->unsubscribe($this->argument('queue'), $this->argument('url'));
 

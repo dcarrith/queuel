@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Queue\QueueInterface;
 use Dcarrith\Queuel\Jobs\SqsJob;
-use Log;
+//use Log;
 
 class SqsQueue extends PushQueue implements QueueInterface {
 
@@ -68,7 +68,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function push($job, $data = '', $queue = null)
 	{
-		Log::info('SqsQueue push', array('queue' => $queue));
+		//Log::info('SqsQueue push', array('queue' => $queue));
 
 		return $this->pushRaw($this->createPayload($job, $data), $queue);
 	}
@@ -83,7 +83,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function pushRaw($payload, $queue = null, array $options = array())
 	{
-		Log::info('SqsQueue pushRaw', array('queue' => $queue));
+		//Log::info('SqsQueue pushRaw', array('queue' => $queue));
 
 		$response = $this->sqs->sendMessage(array('QueueUrl' => $this->getQueueUrl($queue), 'MessageBody' => $payload));
 
@@ -101,10 +101,10 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function later($delay, $job, $data = '', $queue = null)
 	{
-		Log::info('SqsQueue later', array('delay' => $delay));
-		Log::info('SqsQueue later', array('job' => $job));
-		Log::info('SqsQueue later', array('data' => $data));
-		Log::info('SqsQueue later', array('queue' => $queue));
+		//Log::info('SqsQueue later', array('delay' => $delay));
+		//Log::info('SqsQueue later', array('job' => $job));
+		//Log::info('SqsQueue later', array('data' => $data));
+		//Log::info('SqsQueue later', array('queue' => $queue));
 
 		return $this->sqs->sendMessage(array(
 
@@ -123,7 +123,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function pop($queue = null)
 	{
-		Log::info('SqsQueue pop', array('queue'=>$queue));
+		//Log::info('SqsQueue pop', array('queue'=>$queue));
 
 		$this->queue = $queue;
 
@@ -133,7 +133,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 
 		if (count($response['Messages']) > 0)
 		{
-			Log::info('SqsQueue pop', array('response[Messages][0]' => $response['Messages'][0]));
+			//Log::info('SqsQueue pop', array('response[Messages][0]' => $response['Messages'][0]));
 
 			return $this->createSqsJob($response['Messages'][0]);
 		}
@@ -148,13 +148,13 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		$r = $this->request;
 
-		Log::info('SqsQueue marshal', array('request->header()'=>$r->header()));
-		Log::info('SqsQueue marshal', array('request->json()'=>$r->json()));
+		//Log::info('SqsQueue marshal', array('request->header()'=>$r->header()));
+		//Log::info('SqsQueue marshal', array('request->json()'=>$r->json()));
 
 		if($r->header('x-amz-sns-message-type') == 'SubscriptionConfirmation')
 		{
 			$response = $this->getSns()->confirmSubscription(array('TopicArn' => $r->json('TopicArn'), 'Token' => $r->json('Token'), 'AuthenticateOnUnsubscribe' => 'true'));
-			Log::info('SqsQueue marshal', array('response' => $response->toArray()));
+			//Log::info('SqsQueue marshal', array('response' => $response->toArray()));
 		}
 		else
 		{
@@ -173,10 +173,11 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		$r = $this->request;
 
-		Log::info('SqsQueue marshalPushedJob', array(	'MessageId' => $this->parseOutMessageId($r),
+		/*Log::info('SqsQueue marshalPushedJob', array(	'MessageId' => $this->parseOutMessageId($r),
                         					'Body' => $this->parseOutMessage($r),
                         					'pushed' => true,
 							    ));
+		*/
 
 		return array(
 			'MessageId' => $this->parseOutMessageId($r),
@@ -193,7 +194,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	protected function createSqsJob($job, $pushed = false)
 	{
-		Log::info('SqsQueue createSqsJob', array('job' => $job, 'pushed' => $pushed));
+		//Log::info('SqsQueue createSqsJob', array('job' => $job, 'pushed' => $pushed));
 
 		return new SqsJob($this->container, $this, $job, $pushed);
 	}
@@ -205,7 +206,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function getQueue()
 	{
-		Log::info('SqsQueue getQueue', array('queue' => $this->queue));
+		//Log::info('SqsQueue getQueue', array('queue' => $this->queue));
 
 		return $this->queue;
 	}
@@ -218,7 +219,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function getQueueUrl($queue = null)
 	{
-		Log::info('SqsQueue getQueueUrl', array('queueUrl' => ($this->sqs->getBaseUrl() . '/' . $this->account . '/' . ($queue ?: $this->queue))));
+		//Log::info('SqsQueue getQueueUrl', array('queueUrl' => ($this->sqs->getBaseUrl() . '/' . $this->account . '/' . ($queue ?: $this->queue))));
 
 		return $this->sqs->getBaseUrl() . '/' . $this->account . '/' . ($queue ?: $this->queue);
 	}
@@ -284,30 +285,30 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	protected function getQueueOptions($queue, $endpoint, $options, $advanced)
 	{
-		Log::info('SqsQueue getQueueOptions', array('queue' => $queue));
-		Log::info('SqsQueue getQueueOptions', array('endpoint' => $endpoint));
-		Log::info('SqsQueue getQueueOptions', array('options' => $options));
-		Log::info('SqsQueue getQueueOptions', array('advanced' => $advanced));
+		//Log::info('SqsQueue getQueueOptions', array('queue' => $queue));
+		//Log::info('SqsQueue getQueueOptions', array('endpoint' => $endpoint));
+		//Log::info('SqsQueue getQueueOptions', array('options' => $options));
+		//Log::info('SqsQueue getQueueOptions', array('advanced' => $advanced));
 
 		$standardOptions = $this->getStandardOptions($queue, $endpoint, $options);
 
 		$newDeliveryPolicy = array('healthyRetryPolicy' => array('numRetries' => intval($standardOptions['retries'])));
 
-		Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
+		//Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
 
 		if (isset($advanced['healthyRetryPolicy']))
 		{
 			$newDeliveryPolicy['healthyRetryPolicy'] = array_merge($newDeliveryPolicy['healthyRetryPolicy'], $advanced['healthyRetryPolicy']);
 		}
 
-		Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
+		//Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
 
 		if (isset($advanced['throttlePolicy']))
 		{
 			$newDeliveryPolicy['throttlePolicy'] = $advanced['throttlePolicy'];
 		}
 
-		Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
+		//Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
 
 		$newRedrivePolicy = array();
 
@@ -332,11 +333,11 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		$retries = $this->getOption($queue, $endpoint, 'retries', (isset($options['retries']) ? $options['retries'] : false));
 
-		Log::info('SqsQueue getStandardOptions', array('retries' => $retries));
+		//Log::info('SqsQueue getStandardOptions', array('retries' => $retries));
 
 		$errorQueue = $this->getOption($queue, $endpoint, 'error_queue', (isset($options['errqueue']) ? $options['errqueue'] : false));
 
-		Log::info('SqsQueue getStandardOptions', array('error_queue' => $errorQueue));
+		//Log::info('SqsQueue getStandardOptions', array('error_queue' => $errorQueue));
 
 		return array('retries' => intval($retries), 'error_queue' => $errorQueue);
 
@@ -377,7 +378,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 
 		try
 		{
-			Log::info('SqsQueue getOption', array('getQueueMeta' => $this->getQueueMeta($queue, $endpoint)));
+			//Log::info('SqsQueue getOption', array('getQueueMeta' => $this->getQueueMeta($queue, $endpoint)));
 
 			return array_get($this->getQueueMeta($queue, $endpoint), $this->getDotPath($key));
 
@@ -407,7 +408,7 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		if (isset($this->meta))
 		{
-			Log::info('SqsQueue getQueueMeta', array('this->meta' => $this->meta));
+			//Log::info('SqsQueue getQueueMeta', array('this->meta' => $this->meta));
 
 			return $this->meta;
 		}
@@ -417,15 +418,15 @@ class SqsQueue extends PushQueue implements QueueInterface {
 		$meta['QueueAttributes'] = $this->getSqs()->getQueueAttributes(array('QueueUrl' => $this->getQueueUrl($queue),
 										     'Attributes' => 'All'));
 
-		Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
+		//Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
 
 		$meta['SubscriptionArn'] = $this->getCurrentSubscriptionArn($queue, $endpoint);
 
-		Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
+		//Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
 
 		$meta['DeliveryPolicy'] = $this->getCurrentDeliveryPolicy($meta['SubscriptionArn']);
 
-		Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
+		//Log::info('SqsQueue getQueueMeta', array('meta' => $meta));
 
 		return $this->meta = $meta;
 
@@ -447,14 +448,14 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		$response = $this->getSns()->listSubscriptions();
 
-		Log::info('SqsQueue update', array('listSubscriptions' => $response->toArray()));
+		//Log::info('SqsQueue update', array('listSubscriptions' => $response->toArray()));
 
 		$subscription = array_values(array_filter($response->toArray()['Subscriptions'], function($element) use ($endpoint) {
 
 			return $element['Endpoint'] == $endpoint;
 		}));
 
-		Log::info('SqsQueue update', array('subscription' => $subscription));
+		//Log::info('SqsQueue update', array('subscription' => $subscription));
 
 		if ( ! count($subscription)) throw new RuntimeException("Can't find any subscriptions for the '".$queue."' topic.");
 
@@ -471,11 +472,11 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	{
 		$response = $this->getSns()->getSubscriptionAttributes(array('SubscriptionArn' => $arn));
 
-		Log::info('SqsQueue getCurrentDeliveryPolicy', array('response' => $response->toArray()));
+		//Log::info('SqsQueue getCurrentDeliveryPolicy', array('response' => $response->toArray()));
 
 		$existingDeliveryPolicy = json_decode(stripslashes($response->toArray()['Attributes']['EffectiveDeliveryPolicy']), true);
 
-		Log::info('SqsQueue getCurrentDeliveryPolicy', array('existingDeliveryPolicy' => $existingDeliveryPolicy));
+		//Log::info('SqsQueue getCurrentDeliveryPolicy', array('existingDeliveryPolicy' => $existingDeliveryPolicy));
 
 		return $existingDeliveryPolicy;
 	}
@@ -491,17 +492,17 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function subscribe($queue, $endpoint, array $options = array(), array $advanced = array())
 	{
-		Log::info('SqsQueue subscribe', array('queue' => $queue));
-		Log::info('SqsQueue subscribe', array('endpoint' => $endpoint));
-		Log::info('SqsQueue subscribe', array('options' => $options));
+		//Log::info('SqsQueue subscribe', array('queue' => $queue));
+		//Log::info('SqsQueue subscribe', array('endpoint' => $endpoint));
+		//Log::info('SqsQueue subscribe', array('options' => $options));
 
 		$topicArn = $this->getSns()->createTopic(array('Name' => $queue))->get('TopicArn');
 
-		Log::info('SqsQueue subscribe', array('createTopic response->get(TopicArn)' => $topicArn));
+		//Log::info('SqsQueue subscribe', array('createTopic response->get(TopicArn)' => $topicArn));
 
 		$response = $this->getSns()->subscribe(array('TopicArn' => $topicArn, 'Protocol' => ((stripos($endpoint, 'https') !== false) ? 'https' : 'http'), 'Endpoint' => $endpoint));
 
-		Log::info('SqsQueue subscribe', array('response' => $response->toArray()));
+		//Log::info('SqsQueue subscribe', array('response' => $response->toArray()));
 
 		return $response->toArray();
 	}
@@ -515,25 +516,25 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function unsubscribe($queue, $endpoint)
 	{
-		Log::info('SqsQueue unsubscribe', array('list' => 'subscriptions'));
+		//Log::info('SqsQueue unsubscribe', array('list' => 'subscriptions'));
 
 		$response = $this->getSns()->listSubscriptions();
 
-		Log::info('SqsQueue unsubscribe', array('listSubscriptions' => $response->toArray()));
+		//Log::info('SqsQueue unsubscribe', array('listSubscriptions' => $response->toArray()));
 
 		$subscription = array_values(array_filter($response->toArray()['Subscriptions'], function($element) use ($endpoint) {
 
 			return $element['Endpoint'] == $endpoint;
 		}));
 
-		Log::info('SqsQueue unsubscribe', array('subscription' => $subscription));
+		//Log::info('SqsQueue unsubscribe', array('subscription' => $subscription));
 
 		if(count($subscription))
 		{
 			$response = $this->getSns()->unsubscribe(array('SubscriptionArn' => $subscription[0]['SubscriptionArn']));
 		}
 
-		Log::info('SqsQueue unsubscribe', array('response' => $response->toArray()));
+		//Log::info('SqsQueue unsubscribe', array('response' => $response->toArray()));
 
 		return $response->toArray();
 	}
@@ -549,35 +550,35 @@ class SqsQueue extends PushQueue implements QueueInterface {
 	 */
 	public function update($queue, $endpoint, array $options = array(), array $advanced = array())
 	{
-		Log::info('SqsQueue update', array('queue' => $queue));
-		Log::info('SqsQueue update', array('endpoint' => $endpoint));
-		Log::info('SqsQueue update', array('options' => $options));
-		Log::info('SqsQueue update', array('advanced' => $advanced));
+		//Log::info('SqsQueue update', array('queue' => $queue));
+		//Log::info('SqsQueue update', array('endpoint' => $endpoint));
+		//Log::info('SqsQueue update', array('options' => $options));
+		//Log::info('SqsQueue update', array('advanced' => $advanced));
 
 		$queueOptions = $this->getQueueOptions($queue, $endpoint, $options, $advanced);
 
-		Log::info('SqsQueue update', array('queueOptions' => $queueOptions));
+		//Log::info('SqsQueue update', array('queueOptions' => $queueOptions));
 
 		$newDeliveryPolicy = $queueOptions['DeliveryPolicy'];
 
-		Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
+		//Log::info('SqsQueue update', array('newDeliveryPolicy' => $newDeliveryPolicy));
 
 		$subscriptionArn = array_get($this->getQueueMeta($queue, $endpoint), 'SubscriptionArn');
 
-		Log::info('SqsQueue update', array('subscriptionArn' => $subscriptionArn));
+		//Log::info('SqsQueue update', array('subscriptionArn' => $subscriptionArn));
 
 		$response = $this->getSns()->setSubscriptionAttributes(array('SubscriptionArn' => $subscriptionArn,
 									     'AttributeName' => 'DeliveryPolicy',
 									     'AttributeValue' => json_encode($newDeliveryPolicy)));
 
-		Log::info('SqsQueue update', array('response' => $response->toArray()));
+		//Log::info('SqsQueue update', array('response' => $response->toArray()));
 
 		$newRedrivePolicy = $queueOptions['RedrivePolicy'];
 
 		$response = $this->getSqs()->setQueueAttributes(array('QueueUrl' => $this->getQueueUrl($queue),
 								      'Attributes' => array('RedrivePolicy' => json_encode($newRedrivePolicy))));
 
-		Log::info('SqsQueue update', array('response' => $response->toArray()));
+		//Log::info('SqsQueue update', array('response' => $response->toArray()));
 
 		return $response->toArray();
 	}

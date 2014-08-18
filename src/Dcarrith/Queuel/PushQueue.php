@@ -1,8 +1,6 @@
 <?php namespace Dcarrith\Queuel;
 
-use Illuminate\Queue\Queue;
-
-abstract class PushQueue extends Queue implements PushQueueInterface {
+abstract class PushQueue extends Queuel implements PushQueueInterface {
 
 	/**
 	* The current request instance.

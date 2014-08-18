@@ -34,7 +34,7 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 		$this->mockedSqsClient = $this->getMock('Aws\Sqs\SqsClient', array('deleteMessage'), array($this->credentials, $this->signature, $this->config));
 
 		$this->sns = m::mock('Aws\Sns\SnsClient');
-		
+
 		$this->mockedContainer = m::mock('Illuminate\Container\Container');
 
 		$this->mockedJob = 'foo';
@@ -43,7 +43,7 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 		$this->mockedMessageId = 'e3cd03ee-59a3-4ad8-b0aa-ee2e3808ac81';
 		$this->mockedReceiptHandle = '0NNAq8PwvXuWv5gMtS9DJ8qEdyiUwbAjpp45w2m6M4SJ1Y+PxCh7R930NRB8ylSacEmoSnW18bgd4nK\/O6ctE+VFVul4eD23mA07vVoSnPI4F\/voI1eNCp6Iax0ktGmhlNVzBwaZHEr91BRtqTRM3QKd2ASF8u+IQaSwyl\/DGK+P1+dqUOodvOVtExJwdyDLy1glZVgm85Yw9Jf5yZEEErqRwzYz\/qSigdvW4sm2l7e4phRol\/+IjMtovOyH\/ukueYdlVbQ4OshQLENhUKe7RNN5i6bE\/e5x9bnPhfj2gbM';
 
-		$this->mockedTopicArn = 'arn:aws:sns:'.$this->region.':'.$this->account.':'.$this->pushQueueName;	
+		$this->mockedTopicArn = 'arn:aws:sns:'.$this->region.':'.$this->account.':'.$this->pushQueueName;
 
 		$this->mockedJobData = array('Body' => $this->mockedPayload,
 					     'MD5OfBody' => md5($this->mockedPayload),
@@ -66,7 +66,7 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 	public function testFireProperlyCallsTheJobHandler()
 	{
 		$this->mockedSqsClient = $this->getMock('Aws\Sqs\SqsClient', array('deleteMessage'), array($this->credentials, $this->signature, $this->config));
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$queue->setContainer($this->mockedContainer);
 		$job = $this->getJob($queue);
 		$job->getContainer()->shouldReceive('make')->once()->with('foo')->andReturn($handler = m::mock('StdClass'));
@@ -77,32 +77,31 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 	public function testDeleteRemovesTheJobFromSqs()
 	{
 		$this->mockedSqsClient = $this->getMock('Aws\Sqs\SqsClient', array('receiveMessage', 'deleteMessage'), array($this->credentials, $this->signature, $this->config));
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$queue->setContainer($this->mockedContainer);
 		$queue->expects($this->at(0))->method('getQueueUrl')->with(null)->will($this->returnValue($this->queueUrl));
-		$queue->expects($this->at(1))->method('getQueueUrl')->with(null)->will($this->returnValue($this->queueUrl));
 		$job = $this->getJob($queue);
-		$job->getSqsQueue()->getSqs()->expects($this->once())->method('deleteMessage')->with(array('QueueUrl' => $this->queueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle));	
+		$job->getSqsQueue()->getSqs()->expects($this->once())->method('deleteMessage')->with(array('QueueUrl' => $this->queueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle));
 		$job->delete();
 	}
 
 	public function testDeleteRemovesThePushedJobFromSqs()
 	{
 		$this->mockedSqsClient = $this->getMock('Aws\Sqs\SqsClient', array('receiveMessage', 'deleteMessage'), array($this->credentials, $this->signature, $this->config));
-		$queue = $this->getMock('Illuminate\Queue\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
 		$queue->setContainer($this->mockedContainer);
 		$queue->expects($this->at(0))->method('getQueueUrl')->with(null)->will($this->returnValue($this->queueUrl));
 		$queue->expects($this->at(1))->method('getQueueUrl')->with($this->pushQueueName)->will($this->returnValue($this->pushQueueUrl));
 		$request->shouldReceive('header')->once()->with('x-amz-sns-topic-arn')->andReturn($this->mockedTopicArn);
 		$job = $this->getJob($queue, true);
-		$job->getSqsQueue()->getSqs()->expects($this->once())->method('receiveMessage')->with(array('QueueUrl' => $this->pushQueueUrl))->will($this->returnValue($this->mockedReceiveMessageResponseModel));	
-		$job->getSqsQueue()->getSqs()->expects($this->once())->method('deleteMessage')->with(array('QueueUrl' => $this->pushQueueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle));	
+		$job->getSqsQueue()->getSqs()->expects($this->once())->method('receiveMessage')->with(array('QueueUrl' => $this->pushQueueUrl))->will($this->returnValue($this->mockedReceiveMessageResponseModel));
+		$job->getSqsQueue()->getSqs()->expects($this->once())->method('deleteMessage')->with(array('QueueUrl' => $this->pushQueueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle));
 		$job->delete();
 	}
 
 	protected function getJob($queue, $pushed = false)
 	{
-		return new Illuminate\Queue\Jobs\SqsJob(
+		return new Dcarrith\Queuel\Jobs\SqsJob(
 			$this->mockedContainer,
 			$queue,
 			$this->mockedJobData,
