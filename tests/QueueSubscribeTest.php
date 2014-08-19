@@ -75,7 +75,7 @@ class QueueSubscribeTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function testSubscribeCommandThrowsRuntimeExceptionForBeanstalkd()
 	{
-		$queue = $this->getMock('Dcarrith\Queuel\BeanstalkdQueue', array('connection'), array(m::mock('Pheanstalk_Pheanstalk'), 'default'));
+		$queue = $this->getMock('Dcarrith\Queuel\BeanstalkdQueue', array('connection'), array(m::mock('Pheanstalk_Pheanstalk'), 'default', 60));
 		$queue->setContainer(m::mock('Illuminate\Container\Container'));
 		$this->config->shouldReceive('get')->once()->with('queue.default')->andReturn('beanstalkd');
 		$app = $this->getQueueConfigForTest($queue, 'beanstalkd');

@@ -3,11 +3,13 @@
 //use Illuminate\Support\ServiceProvider;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Queue\QueueServiceProvider;
-use \Dcarrith\Queuel\Console\SubscribeCommand;
-use \Dcarrith\Queuel\Console\UnsubscribeCommand;
-use \Dcarrith\Queuel\Console\UpdateCommand;
-use \Dcarrith\Queuel\Connectors\RabbitConnector;
-use \Dcarrith\Queuel\Connectors\SqsConnector;
+use Dcarrith\Queuel\Console\WorkCommand;
+use Dcarrith\Queuel\Console\ListenCommand;
+use Dcarrith\Queuel\Console\SubscribeCommand;
+use Dcarrith\Queuel\Console\UnsubscribeCommand;
+use Dcarrith\Queuel\Console\UpdateCommand;
+use Dcarrith\Queuel\Connectors\RabbitConnector;
+use Dcarrith\Queuel\Connectors\SqsConnector;
 //use Log;
 
 class QueuelServiceProvider extends QueueServiceProvider {
@@ -40,6 +42,10 @@ class QueuelServiceProvider extends QueueServiceProvider {
 
 		$this->registerManager();
 
+		$this->registerWorker();
+
+		$this->registerListener();
+
                 $this->registerSubscriber();
 
                 $this->registerUnsubscriber();
@@ -54,7 +60,7 @@ class QueuelServiceProvider extends QueueServiceProvider {
 	 */
 	protected function registerManager()
 	{
-		$this->app->bindShared('queue', function($app)
+		$this->app->bindShared('queuel', function($app)
 		{
 			// Once we have an instance of the queue manager, we will register the various
 			// resolvers for the queue connectors. These connectors are responsible for
@@ -65,6 +71,68 @@ class QueuelServiceProvider extends QueueServiceProvider {
 
 			return $manager;
 		});
+	}
+
+	/**
+	 * Register the queue worker.
+	 *
+	 * @return void
+	 */
+	protected function registerWorker()
+	{
+		$this->registerWorkCommand();
+
+		$this->registerRestartCommand();
+
+		$this->app->bindShared('queuel.worker', function($app)
+		{
+			return new Worker($app['queuel'], $app['queue.failer'], $app['events']);
+		});
+	}
+
+	/**
+	 * Register the queue worker console command.
+	 *
+	 * @return void
+	 */
+	protected function registerWorkCommand()
+	{
+		$this->app->bindShared('command.queue.work', function($app)
+		{
+			return new WorkCommand($app['queuel.worker']);
+		});
+
+		$this->commands('command.queue.work');
+	}
+
+	/**
+	 * Register the queue listener.
+	 *
+	 * @return void
+	 */
+	protected function registerListener()
+	{
+		$this->registerListenCommand();
+
+		$this->app->bindShared('queuel.listener', function($app)
+		{
+			return new Listener($app['path.base']);
+		});
+	}
+
+	/**
+	 * Register the queue listener console command.
+	 *
+	 * @return void
+	 */
+	protected function registerListenCommand()
+	{
+		$this->app->bindShared('command.queue.listen', function($app)
+		{
+			return new ListenCommand($app['queuel.listener']);
+		});
+
+		$this->commands('command.queue.listen');
 	}
 
         /**
@@ -178,9 +246,9 @@ class QueuelServiceProvider extends QueueServiceProvider {
 	{
 		$this->app->rebinding('request', function($app, $request) use ($driver)
 		{
-			if ($app['queue']->connected($driver))
+			if ($app['queuel']->connected($driver))
 			{
-				$app['queue']->connection($driver)->setRequest($request);
+				$app['queuel']->connection($driver)->setRequest($request);
 			}
 		});
 	}
@@ -192,7 +260,11 @@ class QueuelServiceProvider extends QueueServiceProvider {
          */
         public function provides()
         {
-		return array_merge(parent::provides(), array('command.queue.subscribe', 'command.queue.unsubscribe', 'command.queue.update'));
+		return array(
+			'queue', 'queuel.worker', 'queuel.listener',
+			'command.queue.work', 'command.queue.listen',
+			'command.queue.subscribe'
+		);
         }
 
 }
