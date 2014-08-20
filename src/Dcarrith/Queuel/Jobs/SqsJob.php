@@ -151,7 +151,11 @@ class SqsJob extends QueuelJob {
 	 */
 	public function release($delay = 0)
 	{
-		// SQS job releases are handled by the server configuration...
+		$sqsQueue = $this->getSqsQueue();
+
+		$sqsQueue->getSqs()->changeMessageVisibility(array(	'QueueUrl' => $sqsQueue->getQueueUrl(),
+									'ReceiptHandle' => $this->job['ReceiptHandle'],
+									'VisibilityTimeout' => $delay	));
 	}
 
 	/**

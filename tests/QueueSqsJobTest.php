@@ -23,6 +23,7 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 		$this->queueName = 'emails';
 		$this->pushQueueName = 'notifications';
 		$this->baseUrl = 'https://sqs.someregion.amazonaws.com';
+		$this->releaseDelay = 0;
 
 		$this->credentials = new Credentials( $this->key, $this->secret );
 		$this->signature = new SignatureV4( $this->service, $this->region );
@@ -97,6 +98,17 @@ class QueueSqsJobTest extends PHPUnit_Framework_TestCase {
 		$job->getSqsQueue()->getSqs()->expects($this->once())->method('receiveMessage')->with(array('QueueUrl' => $this->pushQueueUrl))->will($this->returnValue($this->mockedReceiveMessageResponseModel));
 		$job->getSqsQueue()->getSqs()->expects($this->once())->method('deleteMessage')->with(array('QueueUrl' => $this->pushQueueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle));
 		$job->delete();
+	}
+
+	public function testReleaseProperlyReleasesTheJobOntoSqs()
+	{
+		$this->mockedSqsClient = $this->getMock('Aws\Sqs\SqsClient', array('changeMessageVisibility'), array($this->credentials, $this->signature, $this->config));
+		$queue = $this->getMock('Dcarrith\Queuel\SqsQueue', array('getQueueUrl'), array($this->mockedSqsClient, $this->sns, $request = m::mock('Illuminate\Http\Request'), $this->queueName, $this->account));
+		$queue->setContainer($this->mockedContainer);
+		$queue->expects($this->at(0))->method('getQueueUrl')->with(null)->will($this->returnValue($this->queueUrl));
+		$job = $this->getJob($queue);
+		$job->getSqsQueue()->getSqs()->expects($this->once())->method('changeMessageVisibility')->with(array('QueueUrl' => $this->queueUrl, 'ReceiptHandle' => $this->mockedReceiptHandle, 'VisibilityTimeout' => $this->releaseDelay));
+		$job->release($this->releaseDelay);
 	}
 
 	protected function getJob($queue, $pushed = false)
