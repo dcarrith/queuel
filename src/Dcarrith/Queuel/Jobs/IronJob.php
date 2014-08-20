@@ -41,6 +41,9 @@ class IronJob extends QueuelJob {
                                 $job,
                                 $pushed = false)
 	{
+
+		//Log::info('IronJob __construct > job:', (array)$job);
+
 		$this->job = $job;
 		$this->iron = $iron;
 		$this->pushed = $pushed;
@@ -54,6 +57,8 @@ class IronJob extends QueuelJob {
 	 */
 	public function fire()
 	{
+		//Log::info('IronJob fire > json_decode(this->getRawBody):', array(json_decode($this->getRawBody(), true)));
+
 		$this->resolveAndFire(json_decode($this->getRawBody(), true));
 	}
 
@@ -64,6 +69,8 @@ class IronJob extends QueuelJob {
 	 */
 	public function getRawBody()
 	{
+		//Log::info('IronJob getRawBody > this->job->body:', array($this->job->body));
+
 		return $this->job->body;
 	}
 

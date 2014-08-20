@@ -138,6 +138,8 @@ class IronQueue extends PushQueue implements QueueInterface {
 
 		$job = $this->iron->getMessage($queue);
 
+		//Log::info('IronQueue pop', array('job'=>json_encode((array)$job)));
+
 		// If we were able to pop a message off of the queue, we will need to decrypt
 		// the message body, as all Iron.io messages are encrypted, since the push
 		// queues will be a security hazard to unsuspecting developers using it.
@@ -190,9 +192,11 @@ class IronQueue extends PushQueue implements QueueInterface {
 		$messageId = $this->parseOutMessageId($r);
 		$body = $this->parseJobBody($r->getContent());
 
-		return (object) array(
-			'id' => $messageId, 'body' => $body, 'pushed' => true,
-		);
+		$pushedJob = array('id' => $messageId, 'body' => $body, 'pushed' => true);
+
+		//Log::info('IronQueue marshalPushedJob', $pushedJob);
+
+		return (object)$pushedJob;
 	}
 
 	/**

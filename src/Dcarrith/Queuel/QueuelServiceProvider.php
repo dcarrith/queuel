@@ -8,9 +8,25 @@ use Dcarrith\Queuel\Console\ListenCommand;
 use Dcarrith\Queuel\Console\SubscribeCommand;
 use Dcarrith\Queuel\Console\UnsubscribeCommand;
 use Dcarrith\Queuel\Console\UpdateCommand;
+use Dcarrith\Queuel\Connectors\IronConnector;
 use Dcarrith\Queuel\Connectors\RabbitConnector;
 use Dcarrith\Queuel\Connectors\SqsConnector;
 //use Log;
+
+/*
+use IlluminateQueueClosure;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Queue\Console\WorkCommand;
+use Illuminate\Queue\Console\ListenCommand;
+use Illuminate\Queue\Console\RestartCommand;
+use Illuminate\Queue\Connectors\SqsConnector;
+use Illuminate\Queue\Console\SubscribeCommand;
+use Illuminate\Queue\Connectors\SyncConnector;
+use Illuminate\Queue\Connectors\IronConnector;
+use Illuminate\Queue\Connectors\RedisConnector;
+use Illuminate\Queue\Connectors\BeanstalkdConnector;
+use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
+*/
 
 class QueuelServiceProvider extends QueueServiceProvider {
 
@@ -145,7 +161,7 @@ class QueuelServiceProvider extends QueueServiceProvider {
         {
 		//parent::registerConnectors($manager);
 
-                foreach (array('Sqs', 'Rabbit') as $connector)
+                foreach (array('Sqs', 'Rabbit', 'Iron') as $connector)
                 {
                         $this->{"register{$connector}Connector"}($manager);
                 }
@@ -235,6 +251,24 @@ class QueuelServiceProvider extends QueueServiceProvider {
 
                 $this->registerRequestBinder('sqs');
         }
+
+	/**
+	 * Register the IronMQ queue connector.
+	 *
+	 * @param  \Illuminate\Queue\QueueManager  $manager
+	 * @return void
+	 */
+	protected function registerIronConnector($manager)
+	{
+		$app = $this->app;
+
+		$manager->addConnector('iron', function() use ($app)
+		{
+			return new IronConnector($app['encrypter'], $app['request']);
+		});
+
+		$this->registerRequestBinder('iron');
+	}
 
 	/**
 	 * Register the request rebinding event for the push queue.
