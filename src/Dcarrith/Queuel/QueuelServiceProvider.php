@@ -44,7 +44,7 @@ class QueuelServiceProvider extends QueueServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('dcarrith/queuel');
+		//$this->package('dcarrith/queuel');
 	}
 
 	/**
