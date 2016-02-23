@@ -29,6 +29,7 @@
     },
     "suggest": {
         "aws/aws-sdk-php": "Required to use the SQS queue driver and SES mail driver (~3.0).",
+        "videlalvaro/php-amqplib": "Required to use a pure PHP implementation of the AMQP protocol (2.2.*)",
         "pda/pheanstalk": "Required to use the beanstalk queue driver (~3.0)."
     },
     "minimum-stability": "stable"
