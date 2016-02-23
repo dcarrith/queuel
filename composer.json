@@ -9,13 +9,15 @@
     ],
     "require": {
         "php": ">=5.4.0",
-	"laravel/framework": "5.*",
-	"illuminate/support": "5.*",
-	"monolog/monolog": "1.*",
-	"mockery/mockery": "dev-master",
-        "aws/aws-sdk-php": "dev-master",
+        "laravel/framework": "5.*",
+        "illuminate/support": "5.*",
+        "monolog/monolog": "~1.11"
+    },
+    "require-dev":{
+        "mockery/mockery": "~0.9.2",
+        "aws/aws-sdk-php": "~3.0",
         "videlalvaro/php-amqplib": "2.2.*",
-	"pda/pheanstalk": "~3.0"
+        "pda/pheanstalk": "~3.0"
     },
     "autoload": {
         "classmap": [
@@ -24,6 +26,10 @@
         "psr-0": {
             "Dcarrith\\Queuel\\": "src/"
         }
+    },
+    "suggest": {
+        "aws/aws-sdk-php": "Required to use the SQS queue driver and SES mail driver (~3.0).",
+        "pda/pheanstalk": "Required to use the beanstalk queue driver (~3.0)."
     },
     "minimum-stability": "stable"
 }
